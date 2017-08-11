@@ -5,7 +5,6 @@ import org.apache.log4j.*;
 
 // import java.io.*;
 
-
 parser code {:
 	
 	int printCallCount = 0;
@@ -43,95 +42,305 @@ scan with {:
 	return s;
 :}
 
-terminal PROG, LBRACE, RBRACE, SEMI, LPAREN, RPAREN, COMMA, PRINT, RETURN, PLUS, EQUAL, VOID;
-terminal Integer NUMBER ;
-terminal String IDENT ;
-terminal IF, ELSE;
-
-non terminal Program, VarDeclList, MethodDeclList, VarDecl, Type, MethodDecl;
-non terminal FormalParamList, FormalParamDecl, FormPars, ActualPars, ActualParamList; 
-non terminal StatementList, Statement, Designator, Expr, Term, Addop, Factor;
-non terminal Unmatched, Matched;
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-Program ::= PROG IDENT VarDeclList LBRACE MethodDeclList RBRACE ;
+/* CONVECTION: all caps */
+terminal PROGRAM, IDENT, LBRACE, RBRACE, CONST, EQUALS;
+terminal NUMBER, CHAR_CONST, BOOLEAN, COMMA, SEMI, LSQUARE, RSQUARE;
+terminal STATIC, CLASS, EXTENDS, VOID, LPAREN, RPAREN, DOT,IF, ELSE, FOR ;
+terminal BREAK, CONTINUE, RETURN, READ, PRINT, INC, DEC, MINUS, OR, AND ;
+terminal NEW, ISEQUAL, ISNEQUAL, GRTHN, GREEQ, LESSTHN, LESSEQ ;
+terminal PLUS, PLUSEQ, MINUSEQ, MUL, DIV, MOD, MULEQ, MODEQ, DIVEQ ;
 
-VarDeclList ::= VarDeclList VarDecl  
+/* CONVECTION: letter-case */
+non terminal Program, VarTypeList, MethodDeclList, ConstDecl, VarDecl, ClassDecl;
+non terminal Type, ConstType, ConstBase, ArrayOpt, VarDeclBase;
+non terminal StaticOpt, ClassVarDecl, ClassVarDeclBase, ExtendsTypeOpt, ClassMethodDeclOpt ;
+non terminal MethodDeclRetType, FormParsOpt, FormPars, MethodPars, VarArgs, VarDeclList;
+non terminal StatementList, Statement, FormParsBase, DesignatorStatement, Condition ;
+non terminal ElseOpt, DesignatorStatementOpt, ConditionOpt, ExprOpt, Designator, Expr ;
+non terminal PrintArg, DesignatorStatementOpps, Assignop, ActParsOpt,ActPars, MinusOpt ;
+non terminal Addop, Term, CondTerm, CondFact,Relop, Factor,Mulop, AddopRight ;
+non terminal MulopRight, AddopLeft, MulopLeft ;
+/* PRECEDENCE */
+precedence left ELSE ;
+
+/* THE GRAMMAR */
+/* 	CONVECTION: 
+*	*Opt -  1 or 0 occurence 
+*	*List -  0 or more occurence
+*	*Base -  base part
+*/
+
+Program ::=	PROGRAM IDENT VarTypeList LBRACE MethodDeclList RBRACE ;
+
+
+VarTypeList ::=	VarTypeList ConstDecl
 				|
-				/* epsilon */ 
+				VarTypeList VarDecl
+				|
+				VarTypeList ClassDecl
+				|
+				/* epsilon */
 				;
-				
-VarDecl ::= Type IDENT SEMI ;
 
-Type ::= IDENT ;
+ConstDecl ::=	CONST Type ConstBase
+				|
+				ConstDecl COMMA ConstBase
+				|
+				ConstDecl SEMI
+				;
 
-MethodDeclList ::= MethodDeclList MethodDecl
+ConstBase ::= IDENT EQUALS ConstType ;
+
+ConstType ::=	NUMBER
+				|
+				CHAR_CONST
+				|
+				BOOLEAN
+				;
+
+VarDeclList ::=	VarDeclList VarDecl
+				|
+				/* epsilon */
+				;
+
+VarDecl ::=	Type VarDeclBase
+			|
+			VarDecl COMMA VarDeclBase
+			|
+			VarDecl SEMI
+			;
+
+VarDeclBase ::=	IDENT ArrayOpt ;
+
+ArrayOpt ::=	LSQUARE RSQUARE
+				|
+				/* epsilon */
+				;
+
+ClassVarDecl ::=	StaticOpt Type ClassVarDeclBase
+					|
+					ClassVarDecl COMMA ClassVarDeclBase
+					|
+					ClassVarDecl SEMI
+					;
+
+ClassVarDeclBase ::=	 IDENT ArrayOpt ;
+
+StaticOpt ::= 	STATIC
+				|
+				/* epsilon */
+				;
+
+ClassDecl ::=	CLASS IDENT ExtendsTypeOpt LBRACE ClassVarDecl ClassMethodDeclOpt RBRACE ;
+
+ExtendsTypeOpt ::= 	EXTENDS Type
 					|
 					/* epsilon */
 					;
 
-MethodDecl ::= Type IDENT LPAREN FormPars RPAREN VarDeclList LBRACE StatementList RBRACE ;
+ClassMethodDeclOpt ::=	LBRACE MethodDeclList RBRACE
+						|
+						/* epsilon */
+						;
 
-FormPars ::= FormalParamList | /* epsilon */ ;
+MethodDeclList ::= StaticOpt MethodDeclRetType LPAREN MethodPars RPAREN VarDeclList LBRACE StatementList RBRACE;
 
-FormalParamList ::= FormalParamList COMMA FormalParamDecl
+MethodDeclRetType ::=	VOID
+						|
+						Type
+						;
+
+MethodPars ::=	FormPars COMMA VarArgs
+				|
+				FormParsOpt
+				;
+
+VarArgs ::=	Type DOT DOT DOT IDENT ;
+
+FormParsOpt ::=	;
+
+FormPars ::=	FormParsBase
+				|
+				FormPars COMMA FormParsBase
+				;
+
+FormParsBase ::=	Type IDENT ArrayOpt ;
+
+Type ::= IDENT;
+
+StatementList ::=	StatementList Statement
 					|
-					FormalParamDecl
+					/* epsilon */
 					;
-					
-FormalParamDecl ::= Type IDENT ;
 
-StatementList ::= StatementList Statement 
-					|
-				  /* epsilon */
-				  ;
+Statement ::=	DesignatorStatement SEMI 
+				|
+				IF LPAREN Condition RPAREN Statement ElseOpt
+				|
+				FOR LPAREN DesignatorStatementOpt SEMI ConditionOpt SEMI DesignatorStatementOpt RPAREN Statement
+				|
+				BREAK SEMI
+				|
+				CONTINUE SEMI
+				|
+				RETURN ExprOpt SEMI
+				|
+				READ LPAREN Designator RPAREN SEMI
+				|
+				PRINT LPAREN Expr PrintArg RPAREN SEMI
+				|
+				LBRACE StatementList RBRACE
+				;					
 
-Statement ::= Matched | Unmatched ;
+PrintArg ::=	COMMA NUMBER ;
 
-Unmatched ::= IF Expr Statement | IF Expr Matched ELSE Unmatched;
-	
-				  
-Matched ::= Designator EQUAL Expr SEMI 
-			  |
-			  Designator EQUAL error SEMI
-			  {: parser.log.debug("Uspesan oporavak od greske pri dodeli vrednosti."); :}
-			  |
-			  PRINT LPAREN Expr RPAREN SEMI 
-			  {: parser.printCallCount++; :}
-			  |
-			  RETURN Expr SEMI
-			  |
-			  RETURN SEMI
-			  |
-			  IF Expr Matched ELSE Matched
-			  ;
-			  
-Expr ::= Expr Addop Term
-		 |
-		 Term
-		 ;
+ElseOpt ::=	ELSE Statement ;
 
-Term ::= Factor ;
+DesignatorStatementOpt ::=	DesignatorStatement
+							|
+							/* epsilon */
+							;
 
-Factor ::= NUMBER 
+DesignatorStatement ::=	Designator DesignatorStatementOpps ;
+
+DesignatorStatementOpps ::=	Assignop Expr
+							|
+							LPAREN ActParsOpt RPAREN
+							|
+							INC
+							|
+							DEC
+							;
+
+ActParsOpt ::=	ActPars
+				|
+				/* epsilon */
+				;
+
+ActPars ::= Expr
 			|
-		   Designator
-		    |
-		   Designator LPAREN ActualPars RPAREN
-		   ;
+			ActPars COMMA Expr
+			;
 
-ActualPars ::= ActualParamList 
-				| 
-			   /* epsilon */ 
-			   ;
-			   
-ActualParamList ::= ActualParamList COMMA Expr
+ConditionOpt ::=	Condition
 					|
-					Expr
+					/* epsilon */
 					;
 
-Designator ::= IDENT ;
+Condition ::= 	CondTerm
+				|
+				Condition OR CondTerm
+				;
 
-Addop ::= PLUS ;
- 
-			  
+CondTerm ::=	CondFact 
+				|
+				CondTerm AND CondFact
+				;
+
+CondFact ::=	Expr 
+				|
+				Expr Relop Expr
+				;
+
+MinusOpt ::= 	MINUS
+				|
+				/* epsilon */
+				;
+
+ExprOpt ::=	Expr
+			|
+			/* epilon */
+			;
+
+Expr ::=	MinusOpt Term
+			|
+			Expr Addop Term
+			;
+
+Term ::=	Factor
+			|
+			Term Mulop Factor
+			;
+
+Factor ::=	Designator
+			|
+			Designator LPAREN ActParsOpt RPAREN
+			|
+			NUMBER
+			|
+			CHAR_CONST
+			|
+			BOOLEAN
+			|
+			NEW Type
+			|
+			NEW Type LSQUARE Expr RSQUARE
+			|
+			LPAREN Expr RPAREN
+			;
+
+Designator ::=	IDENT
+				|
+				Designator DOT IDENT
+				|
+				Designator LSQUARE Expr RSQUARE
+				;
+
+Assignop ::=	EQUALS
+				|
+				AddopRight
+				|
+				MulopRight
+				;
+
+
+Relop ::=	ISEQUAL
+			|
+			ISNEQUAL
+			|
+			GRTHN
+			|
+			GREEQ
+			|
+			LESSTHN
+			|
+			LESSEQ
+			;
+
+Addop ::=	AddopRight
+			|
+			AddopLeft
+			;
+
+AddopLeft ::=	PLUS
+				|
+				MINUS
+				;
+
+AddopRight ::=	PLUSEQ
+				|
+				MINUSEQ
+				;
+
+Mulop ::= 	MulopLeft
+			|
+			MulopRight 
+			;
+
+MulopLeft ::=	MUL
+				|
+				DIV
+				|
+				MOD
+				;
+
+MulopRight ::=	MULEQ
+				|
+				DIVEQ
+				|
+				MODEQ
+				;

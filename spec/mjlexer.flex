@@ -56,7 +56,7 @@ import java_cup.runtime.Symbol;
 "+" 		{ return new_symbol(sym.PLUS, yytext()); }
 "-" 		{ return new_symbol(sym.MINUS, yytext()); }
 "*" 		{ return new_symbol(sym.MUL, yytext()); }
-"/" 		{ return new_symbol(sym.DEV, yytext()); }
+"/" 		{ return new_symbol(sym.DIV, yytext()); }
 "%" 		{ return new_symbol(sym.MOD, yytext()); }
 "==" 		{ return new_symbol(sym.ISEQUAL, yytext()); }
 "!=" 		{ return new_symbol(sym.ISNEQUAL, yytext()); }
@@ -64,13 +64,13 @@ import java_cup.runtime.Symbol;
 ">=" 		{ return new_symbol(sym.GREEQ, yytext()); }
 "<" 		{ return new_symbol(sym.LESSTHN, yytext()); }
 "<=" 		{ return new_symbol(sym.LESSEQ, yytext()); }
-"&&" 		{ return new_symbol(sym.ANDLOG, yytext()); }
-"||" 		{ return new_symbol(sym.ORLOG, yytext()); }
-"=" 		{ return new_symbol(sym.EQUAL, yytext()); }
+"&&" 		{ return new_symbol(sym.AND, yytext()); }
+"||" 		{ return new_symbol(sym.OR, yytext()); }
+"=" 		{ return new_symbol(sym.EQUALS, yytext()); }
 "+=" 		{ return new_symbol(sym.PLUSEQ, yytext()); }
 "-=" 		{ return new_symbol(sym.MINUSEQ, yytext()); }
 "*=" 		{ return new_symbol(sym.MULEQ, yytext()); }
-"/=" 		{ return new_symbol(sym.DEVEQ, yytext()); }
+"/=" 		{ return new_symbol(sym.DIVEQ, yytext()); }
 "%=" 		{ return new_symbol(sym.MODEQ, yytext()); }
 "++" 		{ return new_symbol(sym.INC, yytext()); }
 "--" 		{ return new_symbol(sym.DEC, yytext()); }
@@ -91,8 +91,8 @@ import java_cup.runtime.Symbol;
 
 [0-9]+							{ return new_symbol(sym.NUMBER, new Integer (yytext())); }
 ([a-z]|[A-Z])[a-z|A-Z|0-9|_]* 	{ return new_symbol (sym.IDENT, yytext()); }
-"'"[\40-\176]"'"				{ return new_symbol (sym.CHAR_CONST, new Character(yytext())); }
-[ true | false ]				{ return ( yytext().equals("true") ? 1 : 0 ); }
+"'"[\40-\176]"'"				{ return new_symbol (sym.CHAR_CONST, new Character(yytext().toCharArray()[0])); }
+[ true | false ]				{ return new_symbol( sym.BOOLEAN,  yytext().equals("true") ? true : false ); }
 
 . { System.err.println("Leksicka greska ("+yytext()+") u liniji "+(yyline+1)); }
 
