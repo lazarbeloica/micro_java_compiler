@@ -1,0 +1,68 @@
+// Test301
+
+//testira se oporavak od greske
+
+program test301
+	//namerna sintaksna greska
+	const int jedan = ;
+	
+	//namerna sintaksna greska
+	const int pet;
+	
+	//namerna sintaksna greska	
+	const int x1, x2 = 3, x3 =;
+	
+	const int y1 = 1, y2 = 2, y3 = 3;
+	
+	char nizch[];
+	
+{
+	void main()	int bodovi;
+	{
+		//namerna sintaksna greska
+		bodovi = ;
+		bodovi++;
+		//namerna sintaksna greska
+		bodovi =  + jedan;
+		
+		//namerna sintaksna greska
+		bodovi+= bodovi +  *= pet;
+		bodovi--;
+		print(bodovi); 
+			
+		
+		niz = new int[2];
+		
+		//namerna sintaksna greska
+		niz[0] = ;
+		niz[1] = 10;
+		bodovi = (niz[1]/=niz[0]);
+		print(bodovi); 
+		print(niz[1]);
+		
+		
+		nizch = new char[3];
+		
+		//namerna sintaksna greska
+		nizch[0] = ;
+		nizch[jedan] = 'b';
+		nizch[pet - 3] = 'c';
+		print( nizch[2 - 1]);
+		print( nizch[jedan * 2]);
+			
+		
+		bodovi += ((pet * jedan - 1) * 2 - (3 % 2 + 3 * 2 - 3) - 1 * 0); 
+		print(bodovi);
+			
+			
+		read(bodovi);
+		
+		//namerna sintaksna greska
+		bodovi = bodovi  1;
+		print(bodovi);
+			
+	
+	}
+}
+
+

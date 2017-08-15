@@ -4,13 +4,15 @@ import java_cup.runtime.*;
 import org.apache.log4j.*;
 
 // import java.io.*;
-
+/* code that executes during parsing */
 parser code {:
 	
-	int printCallCount = 0;
+	int globalVarCnt = 0;
+	int localVarCnt = 0;
+	int globalConstCnt = 0;
+	String currentMethod = null;
 	
 	Logger log = Logger.getLogger(getClass());
-   
    
     // slede redefinisani metodi za prijavu gresaka radi izmene teksta poruke
      
@@ -35,6 +37,7 @@ parser code {:
     }
 :}
 
+/* for intercepting the tokkens from scanner  */
 scan with {:
 	Symbol s = this.getScanner().next_token();
 	if (s != null && s.value != null) 
@@ -45,9 +48,9 @@ scan with {:
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
 /* CONVECTION: all caps */
-terminal PROGRAM, IDENT, LBRACE, RBRACE, CONST, EQUALS;
+terminal PROGRAM, LBRACE, RBRACE, CONST, EQUALS;
+terminal String IDENT ;
 terminal NUMBER, CHAR_CONST, BOOLEAN, COMMA, SEMI, LSQUARE, RSQUARE;
 terminal STATIC, CLASS, EXTENDS, VOID, LPAREN, RPAREN, DOT,IF, ELSE, FOR ;
 terminal BREAK, CONTINUE, RETURN, READ, PRINT, INC, DEC, MINUS, OR, AND ;
@@ -55,15 +58,16 @@ terminal NEW, ISEQUAL, ISNEQUAL, GRTHN, GREEQ, LESSTHN, LESSEQ ;
 terminal PLUS, PLUSEQ, MINUSEQ, MUL, DIV, MOD, MULEQ, MODEQ, DIVEQ ;
 
 /* CONVECTION: letter-case */
-non terminal Program, VarTypeList, MethodDeclList, ConstDecl, VarDecl, ClassDecl;
+non terminal Program, VarTypeList, MethodDeclList, MethodDecl, ConstDecl, VarDecl, ClassDecl;
 non terminal Type, ConstType, ConstBase, ArrayOpt, VarDeclBase;
-non terminal StaticOpt, ClassVarDecl, ClassVarDeclBase, ExtendsTypeOpt, ClassMethodDeclOpt ;
+non terminal StaticOpt, ClassVarDecl, ClassVarDeclBase, ClassVarDeclList, ExtendsTypeOpt, ClassMethodDeclOpt ;
 non terminal MethodDeclRetType, FormParsOpt, FormPars, MethodPars, VarArgs, VarDeclList;
 non terminal StatementList, Statement, FormParsBase, DesignatorStatement, Condition ;
 non terminal ElseOpt, DesignatorStatementOpt, ConditionOpt, ExprOpt, Designator, Expr ;
 non terminal PrintArg, DesignatorStatementOpps, Assignop, ActParsOpt,ActPars, MinusOpt ;
 non terminal Addop, Term, CondTerm, CondFact,Relop, Factor,Mulop, AddopRight ;
 non terminal MulopRight, AddopLeft, MulopLeft ;
+
 /* PRECEDENCE */
 precedence left ELSE ;
 
@@ -90,10 +94,16 @@ ConstDecl ::=	CONST Type ConstBase
 				|
 				ConstDecl COMMA ConstBase
 				|
+				error COMMA ConstBase
+				|
 				ConstDecl SEMI
+				|
+				error SEMI
 				;
 
-ConstBase ::= IDENT EQUALS ConstType ;
+ConstBase ::= 	IDENT EQUALS ConstType 
+				{: parser.globalConstCnt++; :}
+				;
 
 ConstType ::=	NUMBER
 				|
@@ -114,12 +124,24 @@ VarDecl ::=	Type VarDeclBase
 			VarDecl SEMI
 			;
 
-VarDeclBase ::=	IDENT ArrayOpt ;
+VarDeclBase ::=	IDENT ArrayOpt
+				{:	if(parser.currentMethod != null)
+					{
+						if(parser.currentMethod.equals("main")) 
+							parser.localVarCnt++;
+					}else /*global scope*/
+						parser.globalVarCnt++; 
+				:};
 
 ArrayOpt ::=	LSQUARE RSQUARE
 				|
 				/* epsilon */
 				;
+
+ClassVarDeclList ::=	ClassVarDeclList ClassVarDecl
+						|
+						/* epsilon */
+						;
 
 ClassVarDecl ::=	StaticOpt Type ClassVarDeclBase
 					|
@@ -135,7 +157,7 @@ StaticOpt ::= 	STATIC
 				/* epsilon */
 				;
 
-ClassDecl ::=	CLASS IDENT ExtendsTypeOpt LBRACE ClassVarDecl ClassMethodDeclOpt RBRACE ;
+ClassDecl ::=	CLASS IDENT ExtendsTypeOpt LBRACE ClassVarDeclList ClassMethodDeclOpt RBRACE ;
 
 ExtendsTypeOpt ::= 	EXTENDS Type
 					|
@@ -147,7 +169,16 @@ ClassMethodDeclOpt ::=	LBRACE MethodDeclList RBRACE
 						/* epsilon */
 						;
 
-MethodDeclList ::= StaticOpt MethodDeclRetType LPAREN MethodPars RPAREN VarDeclList LBRACE StatementList RBRACE;
+MethodDeclList ::=	MethodDeclList MethodDecl
+					|
+					/* epsilon */
+					;
+
+MethodDecl ::= 	StaticOpt MethodDeclRetType IDENT:method_name 
+				{: parser.currentMethod = method_name; :}
+				LPAREN MethodPars RPAREN VarDeclList LBRACE StatementList RBRACE
+				{: parser.currentMethod = null; :}
+				;
 
 MethodDeclRetType ::=	VOID
 						|
@@ -161,7 +192,10 @@ MethodPars ::=	FormPars COMMA VarArgs
 
 VarArgs ::=	Type DOT DOT DOT IDENT ;
 
-FormParsOpt ::=	;
+FormParsOpt ::=	FormPars
+				|
+				/* epsilon */
+				;
 
 FormPars ::=	FormParsBase
 				|
@@ -177,7 +211,10 @@ StatementList ::=	StatementList Statement
 					/* epsilon */
 					;
 
-Statement ::=	DesignatorStatement SEMI 
+Statement ::=	DesignatorStatement SEMI
+				|
+				/* only a workaround; covers the requirements; can be improved*/
+				error SEMI 
 				|
 				IF LPAREN Condition RPAREN Statement ElseOpt
 				|
@@ -196,7 +233,10 @@ Statement ::=	DesignatorStatement SEMI
 				LBRACE StatementList RBRACE
 				;					
 
-PrintArg ::=	COMMA NUMBER ;
+PrintArg ::=	PrintArg COMMA NUMBER 
+				|
+				/* epsilon */
+				;
 
 ElseOpt ::=	ELSE Statement ;
 

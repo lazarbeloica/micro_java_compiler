@@ -76,6 +76,7 @@ import java_cup.runtime.Symbol;
 "--" 		{ return new_symbol(sym.DEC, yytext()); }
 ";" 		{ return new_symbol(sym.SEMI, yytext()); }
 "," 		{ return new_symbol(sym.COMMA, yytext()); }
+"." 		{ return new_symbol(sym.DOT, yytext()); }
 
 "(" 		{ return new_symbol(sym.LPAREN, yytext()); }
 ")" 		{ return new_symbol(sym.RPAREN, yytext()); }
@@ -91,7 +92,7 @@ import java_cup.runtime.Symbol;
 
 [0-9]+							{ return new_symbol(sym.NUMBER, new Integer (yytext())); }
 ([a-z]|[A-Z])[a-z|A-Z|0-9|_]* 	{ return new_symbol (sym.IDENT, yytext()); }
-"'"[\40-\176]"'"				{ return new_symbol (sym.CHAR_CONST, new Character(yytext().toCharArray()[0])); }
+"'"[\40-\176]"'"				{ return new_symbol (sym.CHAR_CONST, new Character(yytext().toCharArray()[1])); }
 [ true | false ]				{ return new_symbol( sym.BOOLEAN,  yytext().equals("true") ? true : false ); }
 
 . { System.err.println("Leksicka greska ("+yytext()+") u liniji "+(yyline+1)); }

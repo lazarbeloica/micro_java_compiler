@@ -1,0 +1,62 @@
+// Test0
+
+//testira se prebrojavanje
+
+program test0
+	const int jedan = 1;
+	const int pet = 5;
+
+	int niz[];
+	
+	char nizch[], ch1, ch2[];
+	
+	const int y1 = 1, y2 = 2, y3 = 3;
+	
+	
+{
+
+	void mtd0() int x1, x2,x3; int y1;{}
+	
+	void main()	int bodovi; int x1, x2,x3; int y1;
+	{
+	
+		bodovi = 0;
+		bodovi++;
+		bodovi = 1 + jedan;
+		bodovi+= bodovi *= pet;
+		bodovi--;
+		print(bodovi); 
+			
+		
+		niz = new int[2];
+		niz[0] = pet;
+		niz[1] = 10;
+		bodovi = (niz[1]/=niz[0]);
+		print(bodovi); 
+		print(niz[1]);
+		
+		
+		nizch = new char[3];
+		nizch[0] = 'a';
+		nizch[jedan] = 'b';
+		nizch[pet - 3] = 'c';
+		print( nizch[2 - 1]);
+		print( nizch[jedan * 2]);
+			
+		
+		bodovi += ((pet * jedan - 1) * 2 - (3 % 2 + 3 * 2 - 3) - 1 * 0); 
+		print(bodovi);
+			
+			
+		read(bodovi);
+		bodovi = bodovi + 1;
+		print(bodovi);
+			
+	
+	}
+}
+
+//globalnih const ima 5
+//globalnih prom ima 4
+//u main promenljivih ima 5
+

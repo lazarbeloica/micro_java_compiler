@@ -1,0 +1,89 @@
+// Test1
+
+//testira se ispraavno napisana gramatika
+
+program test1
+	const int jedan = 1;
+	const int pet = 5;
+
+	int niz[];
+	
+	char nizch;
+	
+	char test;
+	
+	class Class0 extends int {}
+	
+	class Class1 {}
+	
+	class Class2 extends int {
+		static int var0, var1[], var2;
+		char a;
+	}
+	
+	class Class3 extends int {
+		
+		{ 	
+			static void mtd0() int x;{}
+			void mtd1() {} 
+		}
+		 
+	}
+	
+	
+	class Class4 extends int {
+		static int var0, var1[], var2;
+		char a; 
+		
+		{ 
+			static void mtd0() int x;{} 
+			 void mtd1() {} 
+		}
+	}
+	
+	
+{
+	int mtd0(int x){}
+	
+	static void mtd1(int arg, int arg1[], int...arg3) int x1{}
+
+	void main()	int bodovi;
+	{
+	
+		bodovi = 0;
+		bodovi++;
+		bodovi = 1 + jedan;
+		bodovi+= bodovi *= pet;
+		bodovi--;
+		print(bodovi); 
+			
+		
+		niz = new int[2];
+		niz[0] = pet;
+		niz[1] = 10;
+		bodovi = (niz[1]/=niz[0]);
+		print(bodovi); 
+		print(niz[1]);
+		
+		
+		nizch = new char[3];
+		nizch[0] = 'a';
+		nizch[jedan] = 'b';
+		nizch[pet - 3] = 'c';
+		print( nizch[2 - 1]);
+		print( nizch[jedan * 2]);
+			
+		
+		bodovi += ((pet * jedan - 1) * 2 - (3 % 2 + 3 * 2 - 3) - 1 * 0); 
+		print(bodovi);
+			
+			
+		read(bodovi);
+		bodovi = bodovi + 1;
+		print(bodovi);
+			
+	
+	}
+}
+
+
